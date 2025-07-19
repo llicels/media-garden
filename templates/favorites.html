@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Favorites</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="icon"
+      type="image/gif"
+      href="https://99gifshop.neocities.org/items/7/heartbounce.gif">
+</head>
+<body>
+    <nav class="navbar bg-rose-200 py-4 mb-4 flex gap-x-96">
+        <div>
+            <h2 class="ml-8 w-96 text-rose-800">tv land</h2>
+        </div>
+        <div class="flex gap-x-12 text-white">
+            <div>
+                <form action="/"><button>popular movies</button></form>
+            </div>
+            <div>
+                <form action="/series"><button>popular shows</button></form>
+            </div>
+            <div>
+                <form action="/search"><button>search</button></form>
+            </div>
+            <div>
+                <form action="/favorites"><button>favorites</button></form>
+            </div>
+        </div>
+    </nav>
+
+    <div class="grid grid-cols-5 ml-8 gap-x-0.5 gap-y-4 mt-8">
+        {% for favorite in favorites %}
+        <form action="/watching" method="POST">
+      
+        <li class="list-none">
+            <button>
+                <img src="{{ favorite.image_url }}" width="240" height="325" class="rounded-lg shadow-xl">
+            </button><p>
+          {{ favorite.title }}
+          </p>
+          <input type="hidden" name="contentId" value="{{ favorite.link }}">
+        </li></form>
+        {% endfor %}
+</div>
+
+
+  
+</body>
+</html>
