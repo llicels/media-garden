@@ -1,5 +1,4 @@
 requests
-itertools
 json
 flask_sqlalchemy
 random
