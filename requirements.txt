@@ -4,3 +4,4 @@ json
 flask_sqlalchemy
 random
 ast
+gunicorn
