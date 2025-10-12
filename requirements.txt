@@ -1,5 +1,4 @@
 requests
-json
 flask_sqlalchemy
 random
 ast
