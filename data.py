@@ -21,7 +21,7 @@ def popularMovies(page):
     for i in range (numberOfResults):
         image = f"http://image.tmdb.org/t/p/w500/{response['results'][i]['poster_path']}"
         id = int(response["results"][i]["id"])
-        link = f"https://vidsrc.to/embed/movie/{id}"
+        link = f"https://multiembed.mov/?video_id={id}&tmdb=1"
         #here
         movies[i]=[response["results"][i]["title"], image, link, id]
 
