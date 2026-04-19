@@ -1,88 +1,100 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <title>TVland</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link
-      rel="icon"
-      type="image/gif"
-      href="https://99gifshop.neocities.org/items/7/heartbounce.gif"
-    />
-  </head>
+{% extends "base.html" %}
 
-  <body class="bg-stone-200">
-    <nav class="navbar bg-rose-200 py-4 mb-4 flex gap-x-96 text-rose-800">
-      <div>
-        <h2 class="ml-8 w-96">tv land</h2>
-      </div>
-      <div class="flex gap-x-12 text-white">
-        <div>
-          <form action="/"><button>popular movies</button></form>
-        </div>
-        <div>
-          <form action="/series"><button>popular shows</button></form>
-        </div>
-        <div>
-          <form action="/search"><button>search</button></form>
-        </div>
-        <div>
-          <form action="/favorites"><button>favorites</button></form>
-        </div>
-      </div>
-    </nav>
-    <div id="mainPage">
-      <div id="plays" class="flex justify-center mt-2">
-        <iframe
-          id="player"
-          allowfullscreen
-          webkitallowfullscreen
-          mozallowfullscreen
-          oallowfullscreen
-          msallowfullscreen
-          class="flex justify-center mt-2"
-          width="769"
-          height="431"
-          src="{{ content }}"
-        >
-        </iframe>
-      </div>
-     <!-- <div class="px-6 py-4 flex justify-center">
-        <label>Season:</label>
+{% block content %}
 
-        <form action="/episodes" method="post">
-          <select id="selectSeason" name="eNumber" class="mx-2">
-            {% for item in info %}
-            <option value="{{ item }}">{{ item[0] }}</option>
-            {% endfor %}
-          </select>
-          <input type="hidden"  name="id" value="{{ id }}">
-          <input type="hidden"  name="content" value="{{ content }}">
-          <button type="submit">Go</button>
-        </form>
-        
-        
-        
-        
-        
-        
+<div class="flex flex-col items-center">
 
-        <label>Episode:</label>
-        
-         <form action="/watchepisode" method="post">
-          <select name="episodeWatch" class="mx-2">
-          {%for i in range (1, nEps+1) %}
-          <option value="{{ i }}">{{ i }}</option>
-          {% endfor %}}
-        </select>
-        <input type="hidden"  name="id" value="{{ id }}">
-           <input type="hidden"  name="season" value="{{ season }}">
-        <button type="submit">Go</button>
-        </form>
-        
-        
-      </div>-->
-    </div> 
-  </body>
-</html>
+  <!-- PLAYER -->
+  <iframe
+    id="player"
+    src="{{ content }}"
+    class="w-full max-w-5xl aspect-video rounded-xl border border-green-950"
+    allowfullscreen>
+  </iframe>
+
+  <!-- YOUTUBE FALLBACK -->
+  {% if type == "youtube" %}
+  <a 
+    href="{{ content.replace('embed/', 'watch?v=') }}" 
+    target="_blank"
+    class="mt-4 text-neutral-400 hover:text-white"
+  >
+    open on youtube
+  </a>
+  {% endif %}
+
+  <!-- SERIES CONTROLS -->
+  {% if type == "tv" %}
+  <div class="mt-6 flex gap-4 items-center">
+
+    <!-- SEASON -->
+    <div>
+      <label class="text-sm text-green-950">Season</label>
+      <select id="seasonSelect" class="bg-lime-100 border border-lime-700 px-2 py-1 rounded">
+        {% for s in info %}
+        <option value="{{ s[0] }}">{{ s[0] }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <!-- EPISODE -->
+    <div>
+      <label class="text-sm text-green-950">Episode</label>
+      <select id="episodeSelect" class="bg-lime-100 border border-lime-700 px-2 py-1 rounded"></select>
+    </div>
+
+  </div>
+  {% endif %}
+
+</div>
+
+<script>
+(function () {
+  const type = "{{ type }}";
+
+  if (type === "tv") {
+    const info = {{ info | tojson }};
+    const id = "{{ id }}";
+
+    const seasonSelect = document.getElementById("seasonSelect");
+    const episodeSelect = document.getElementById("episodeSelect");
+    const player = document.getElementById("player");
+
+    function loadEpisodes() {
+      const season = parseInt(seasonSelect.value);
+      const seasonData = info.find(s => s[0] === season);
+
+      if (!seasonData) return;
+
+      const totalEpisodes = seasonData[1];
+      episodeSelect.innerHTML = "";
+
+      for (let i = 1; i <= totalEpisodes; i++) {
+        const option = document.createElement("option");
+        option.value = i;
+        option.textContent = i;
+        episodeSelect.appendChild(option);
+      }
+    }
+
+    function updatePlayer() {
+      const season = seasonSelect.value;
+      const episode = episodeSelect.value;
+
+      player.src = `https://multiembed.mov/?video_id=${id}&tmdb=1&s=${season}&e=${episode}`;
+    }
+
+    seasonSelect.addEventListener("change", () => {
+      loadEpisodes();
+      updatePlayer();
+    });
+
+    episodeSelect.addEventListener("change", updatePlayer);
+
+    loadEpisodes();
+    updatePlayer();
+  }
+})();
+</script>
+
+{% endblock %}

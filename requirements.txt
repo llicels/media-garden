@@ -1,3 +1,5 @@
 requests
 flask_sqlalchemy
 gunicorn
+dotenv
+isodate

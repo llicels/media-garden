@@ -1,157 +1,169 @@
-from flask import Flask, jsonify
-from flask import render_template
-from flask import request, send_file
-import data
-from data import popularMovies, popularSeries, search, seriesInfo
-import json
+from flask import Flask, render_template, request, redirect
 from flask_sqlalchemy import SQLAlchemy
-import random
-import ast
 from sqlalchemy.exc import IntegrityError
-
-
-
+import data
 
 app = Flask(__name__)
+
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///favorites.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
 db = SQLAlchemy(app)
 
+
+# =====================
+# MODEL
+# =====================
+
 class Favorite(db.Model):
-    id = db.Column(db.Integer, primary_key=True, unique=True)
+    id = db.Column(db.String, primary_key=True)
     title = db.Column(db.String(100), nullable=False)
     image_url = db.Column(db.String(200), nullable=False)
     link = db.Column(db.String(200), nullable=False)
-    
-def convert_string_to_list(string):
-    try:
-        # Use ast.literal_eval to safely parse the string
-        result = ast.literal_eval(string)
-        if isinstance(result, list):
-            return result
-        else:
-            raise ValueError("The string does not contain a list.")
-    except (ValueError, SyntaxError) as e:
-        print(f"Error converting string to list: {e}")
-        return None
+    type = db.Column(db.String(20))  # youtube / movie / tv
 
-@app.route('/', methods=['GET', 'POST'])
+
+# =====================
+# ROUTES
+# =====================
+
+@app.route('/')
 def index():
-    if request.method == 'POST':
-        page_number = int(request.form.get('page'))
-        new_movies = popularMovies(page_number)
-    else:
-        page_number = 1
-        # Initial movie list rendering
-        new_movies = popularMovies(page_number)
+    page_number = request.args.get("page", 1, type=int)
+    movies = data.popularMovies(page_number)
+    return render_template('index.html', content=movies, page=page_number)
 
-    return render_template('index.html', movies=new_movies, page_number=page_number)
 
-@app.route('/series', methods=['GET', 'POST'])
+@app.route('/series')
 def series():
-    if request.method == 'POST':
-        page_number = int(request.form.get('page'))
-        new_movies = popularSeries(page_number)
-    else:
-        page_number = 1
-        # Initial movie list rendering
-        new_movies = popularSeries(page_number)
+    page_number = request.args.get("page", 1, type=int)
+    series = data.popularSeries(page_number)
+    return render_template('index.html', content=series, page=page_number)
 
-    return render_template('index.html', movies=new_movies, page_number=page_number)
+
+@app.route('/youtube', methods=["GET", "POST"])
+def youtube():
+    if request.method == "POST":
+        query = request.form.get("query")
+        content = data.searchYoutube(query)
+    else:
+        content = data.youtubeVideosByCategory()
+
+    return render_template("youtube.html", content=content)
+
+@app.route("/youtube/refresh")
+def refresh_youtube():
+    content = data.youtubeVideosByCategory(force_refresh=True)
+    return redirect("/youtube")
 
 @app.route('/search', methods=['GET', 'POST'])
 def searching():
     if request.method == 'POST':
         name = request.form.get('name')
-        content = search(name)
+        content = data.search(name)
         return render_template('search.html', content=content)
-    
+
     return render_template('search.html')
 
-@app.route('/favorite', methods=['GET', 'POST'])
-def loving():
+@app.route('/watch')
+def watch():
+    content = request.args.get("contentId")
+    type_ = request.args.get("type")
+    id_ = request.args.get("id")
+
+    info = []
+
+    if type_ == "tv" and id_:
+        info = data.seriesInfo(id_)
+
+    return render_template(
+        "watch.html",
+        content=content,
+        type=type_,
+        info=info,
+        id=id_
+    )
+
+
+@app.route('/watching', methods=['POST'])
+def watching():
+    link = request.form.get('link')
+    content_type = request.form.get('type')
+    content_id = request.form.get('id')
+
+    if content_type == "tv":
+        info = data.seriesInfo(content_id)
+    else:
+        info = []
+
+    return render_template('watch.html', content=link, info=info, id=content_id, type=content_type)
+
+
+@app.route('/favorite', methods=['POST'])
+def favorite():
     try:
-        item = request.form.get('love')
-        res = convert_string_to_list(item)
-        print(res[3])
-        title = res[0]
-        image = res[1]
-        link = res [2]
-        id = res[3]
-        show = {"id": id, "title":title, "image_url":image, "link":link}
-        favorite = Favorite(id=show['id'], title=show['title'], image_url=show['image_url'], link=show['link'])
-        db.session.add(favorite)
-        db.session.commit()
-    except IntegrityError:
-        db.session.rollback()  # Rollback the session to remove the failed insert operation
-        return render_template('search.html')
-    
-        
-    
-    return render_template('search.html')
+        fav = Favorite(
+            id=request.form.get('id'),
+            title=request.form.get('title'),
+            image_url=request.form.get('image'),
+            link=request.form.get('link')
+        )
 
-@app.route('/print_favorites')
-def print_favorites():
-    all_favorites = Favorite.query.all()
-    for favorite in all_favorites:
-        print(f"Title: {favorite.title}, Image URL: {favorite.image_url}, Link: {favorite.link}")
-    return "Favorites printed to console"
+        db.session.add(fav)
+        db.session.commit()
+
+    except IntegrityError:
+        db.session.rollback()
+
+    return "Ok"
+
 
 @app.route('/favorites')
 def favorites():
     all_favorites = Favorite.query.all()
     return render_template('favorites.html', favorites=all_favorites)
-  
-@app.route('/watching', methods=['POST'])
-def watching():
-  if request.method == 'POST':
-    content = request.form.get('contentId')
-    id = request.form.get('tmdb')
-    type = request.form.get('type')
-    print(type)
-    if(type == "tv"):
-      info = seriesInfo(id)
-    else:
-      info = [0, 0, 0]
-  else:
-    content = 1
-  return render_template('watch.html', content = content, info = info, nEps = 0, id = id)
 
-@app.route('/episodes', methods=['POST'])
-def episodes():
-  if request.method ==  'POST':
-    season = request.form.get('eNumber')
-    id = request.form.get('id')
-    eps = int(season[4])
-    season = int(season[1])
-    content = request.form.get('content')
-    info = seriesInfo(id)
-    print(eps)
-  else:
-    season = 1
-    
-  return render_template('watch.html', nEps = eps, info = info, content = content, id = id, season = season)
+@app.route('/save', methods=['POST'])
+def save():
+    data = request.get_json()
 
-@app.route('/watchepisode', methods=['POST'])
-def watchEp():
-  if request.method ==  'POST':
-    season = request.form.get('season')
-    id = request.form.get('id')
-    episode = request.form.get('episodeWatch')
-    print(episode)
-    content = f"https://vidsrc.to/embed/tv/{id}/{season}/{episode}"
-    info = seriesInfo(id)
-    print(content)
-  else:
-    season = 1
-    
-  return render_template('watch.html', nEps=0, info = info, content = content, id = id, season = season)
+    unique_id = f"{data['type']}_{data['id']}"
 
+    item = Favorite(
+        id=unique_id,
+        title=data['title'],
+        image_url=data['image'],
+        link=data['link'],
+        type=data['type']
+    )
 
+    try:
+        db.session.add(item)
+        db.session.commit()
+        return {"status": "saved"}
+    except:
+        db.session.rollback()
+        return {"status": "exists"}
+
+@app.route('/remove', methods=['POST'])
+def remove():
+    data = request.get_json()
+
+    unique_id = f"{data['type']}_{data['id']}"
+
+    item = Favorite.query.get(unique_id)
+
+    if item:
+        db.session.delete(item)
+        db.session.commit()
+
+    return {"status": "removed"}
+# =====================
+# RUN
+# =====================
 
 if __name__ == "__main__":
     with app.app_context():
-        db.create_all()  # Create tables if they don't exist
-    app.run()
+        db.create_all()
 
-
+    app.run(debug=True)

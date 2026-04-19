@@ -1,65 +1,92 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="icon"
-      type="image/gif"
-      href="https://99gifshop.neocities.org/items/7/heartbounce.gif">
+{% extends "base.html" %}
 
-    <title>Discover</title>
-</head>
-<body>
-    <nav class="navbar bg-rose-200 py-4 mb-4 flex gap-x-96 text-rose-800">
-        <div>
-            <h2 class="ml-8 w-96">tv land</h2>
-        </div>
-        <div class="flex gap-x-12 text-white">
-            <div>
-                <form action="/"><button>popular movies</button></form>
-            </div>
-            <div>
-                <form action="/series"><button>popular shows</button></form>
-            </div>
-            <div>
-                <form action="/search"><button>search</button></form>
-            </div>
-            <div>
-                <form action="/favorites"><button>favorites</button></form>
-            </div>
-        </div>
-    </nav>
+{% block content %}
 
-    <div class="grid grid-cols-5 ml-8 gap-x-0.5 gap-y-4">
-        {% for movie in movies %}
-        <form action="/watching" method="POST">
-      
-        <li class="list-none">
-            <button>
-                <img src="{{ movie[1] }}" width="240" height="325" class="rounded-lg shadow-xl">
-            </button><p>
-          {{ movie[0] }}
-          </p>
-          <input type="hidden" name="contentId" value="{{ movie[2] }}">
-        </li></form>
-        {% endfor %}
+<h2 class="text-xl mb-6 capitalize text-lime-700">{{ request.path[1:] or "movies" }}</h2>
+
+<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+
+  {% for item in content %}
+  <div class="group cursor-pointer">
+
+    <!-- CLICKABLE IMAGE -->
+    <form action="/watching" method="POST">
+      <button class="w-full">
+        <img src="{{ item.image }}" class="w-full h-80 object-cover rounded-xl transition group-hover:opacity-80">
+      </button>
+
+      <input type="hidden" name="link" value="{{ item.link }}">
+      <input type="hidden" name="id" value="{{ item.id }}">
+      <input type="hidden" name="type" value="{{ item.type }}">
+    </form>
+
+    <!-- TEXT -->
+    <div class="mt-2">
+      <p class="text-sm line-clamp-2 text-green-950">{{ item.title }}</p>
+      <p class="text-xs text-neutral-500">{{ item.type }}</p>
     </div>
-    <div id="controls" class="flex justify-end mb-8">
-        <div>
-            <form method="POST">
-                {% if page_number > 1 %}
-                <input type="hidden" name="page" value="{{ page_number - 1 }}">
-                <button type="submit" class="button mr-14 rounded-xl bg-rose-400 px-10 text-white py-1.5 shadow-xl">Back</button> 
-                {% endif %}
-            </form></div>
-        <div>
-            <form method="POST">
-                <input type="hidden" name="page" value="{{ page_number + 1 }}">
-                <button type="submit" class="button mr-14 rounded-xl bg-rose-400 px-10 text-white py-1.5 shadow-xl">More</button>
-            </form>
-        </div>
+
+    <!-- FAVORITE -->
+     <button 
+  onclick="saveItem(this)"
+  class="text-xs text-neutral-500 hover:text-pink-400"
+  data-id="{{ item.id }}"
+  data-title="{{ item.title }}"
+  data-image="{{ item.image }}"
+  data-link="{{ item.link }}"
+  data-type="{{ item.type }}">
+  ♥ save
+</button>
     
+
+  </div>
+  {% endfor %}
+
+  <div class="flex justify-between mt-8">
+
+        {% if page > 1 %}
+        <a href="{{ '/series' if content == 'series' else '/' }}?page={{ page - 1 }}" class="px-4 py-2 bg-lime-700 text-white rounded">
+          ← Back
+        </a>
+        {% endif %}
+
+        <a href="{{ '/series' if media_type == 'series' else '/' }}?page={{ page + 1 }}" class="px-4 py-2 bg-lime-700 text-white rounded">
+          Next →
+        </a>
+
+      </div>
+
 </div>
-</body>
-</html>
+
+<script>
+function saveItem(btn) {
+  fetch("/save", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({
+      id: btn.dataset.id,
+      title: btn.dataset.title,
+      image: btn.dataset.image,
+      link: btn.dataset.link,
+      type: btn.dataset.type
+    })
+  }).then(() => {
+    btn.textContent = "💗";
+  });
+}
+
+function removeItem(btn) {
+  fetch("/remove", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({
+      id: btn.dataset.id,
+      type: btn.dataset.type
+    })
+  }).then(() => {
+    btn.closest(".card").remove();
+  });
+}
+</script>
+
+{% endblock %}

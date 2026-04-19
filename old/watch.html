@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>TVland</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      rel="icon"
+      type="image/gif"
+      href="https://99gifshop.neocities.org/items/7/heartbounce.gif"
+    />
+  </head>
+
+  <body class="bg-stone-200">
+    <nav class="navbar bg-rose-200 py-4 mb-4 flex gap-x-96 text-rose-800">
+      <div>
+        <h2 class="ml-8 w-96">tv land</h2>
+      </div>
+      <div class="flex gap-x-12 text-white">
+        <div>
+          <form action="/"><button>popular movies</button></form>
+        </div>
+        <div>
+          <form action="/series"><button>popular shows</button></form>
+        </div>
+        <div>
+          <form action="/search"><button>search</button></form>
+        </div>
+        <div>
+          <form action="/favorites"><button>favorites</button></form>
+        </div>
+      </div>
+    </nav>
+    <div id="mainPage">
+      <div id="plays" class="flex justify-center mt-2">
+        <iframe
+          id="player"
+          allowfullscreen
+          webkitallowfullscreen
+          mozallowfullscreen
+          oallowfullscreen
+          msallowfullscreen
+          class="flex justify-center mt-2"
+          width="769"
+          height="431"
+          src="{{ content }}"
+        >
+        </iframe>
+      </div>
+     <!-- <div class="px-6 py-4 flex justify-center">
+        <label>Season:</label>
+
+        <form action="/episodes" method="post">
+          <select id="selectSeason" name="eNumber" class="mx-2">
+            {% for item in info %}
+            <option value="{{ item }}">{{ item[0] }}</option>
+            {% endfor %}
+          </select>
+          <input type="hidden"  name="id" value="{{ id }}">
+          <input type="hidden"  name="content" value="{{ content }}">
+          <button type="submit">Go</button>
+        </form>
+        
+        
+        
+        
+        
+        
+
+        <label>Episode:</label>
+        
+         <form action="/watchepisode" method="post">
+          <select name="episodeWatch" class="mx-2">
+          {%for i in range (1, nEps+1) %}
+          <option value="{{ i }}">{{ i }}</option>
+          {% endfor %}}
+        </select>
+        <input type="hidden"  name="id" value="{{ id }}">
+           <input type="hidden"  name="season" value="{{ season }}">
+        <button type="submit">Go</button>
+        </form>
+        
+        
+      </div>-->
+    </div> 
+  </body>
+</html>

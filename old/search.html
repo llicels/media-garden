@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Search</title>
+    <link rel="icon"
+      type="image/gif"
+      href="https://99gifshop.neocities.org/items/7/heartbounce.gif">
+  </head>
+
+  <body>
+    <nav class="navbar bg-rose-200 py-4 mb-4 flex gap-x-96">
+      <div>
+        <h2 class="ml-8 w-96 text-rose-800">tv land</h2>
+      </div>
+      <div class="flex gap-x-12 text-white">
+        <div>
+          <form action="/"><button>popular movies</button></form>
+        </div>
+        <div>
+          <form action="/series"><button>popular shows</button></form>
+        </div>
+        <div>
+          <form action="/search"><button>search</button></form>
+        </div>
+        <div>
+          <form action="/favorites"><button>favorites</button></form>
+        </div>
+      </div>
+    </nav>
+
+    <form action="/search" method="post" class="">
+      <div class="flex justify-center">
+        <input
+          type="text"
+          name="name"
+          id=""
+          class="bg-white border border-rose-300 text-rose-900 text-sm rounded-xl w-96 py-2"
+        />
+      </div>
+      <br />
+      <div class="flex justify-center">
+        <button
+          type="submit"
+          class="button rounded-xl bg-rose-400 px-10 text-white py-1.5 shadow-xl"
+        >
+          Search
+        </button>
+      </div>
+    </form>
+
+    <div class="grid grid-cols-5 ml-8 gap-x-0.5 gap-y-4 mt-8">
+      {% for item in content %}
+      
+        <li class="list-none">
+          <form action="/watching" method="POST">
+          <button>
+            <img
+              src="{{ item[1] }}"
+              width="240"
+              height="325"
+              class="rounded-lg shadow-xl"
+            />
+          </button>
+          <div class="flex gap-x-2">
+            <p>{{ item[0] }}</p>
+          </div>
+            <input type="hidden" name="tmdb" value="{{ item[3] }}"/>
+            <input type="hidden" name="type" value="{{ item[4] }}"/>
+          <input type="hidden" name="contentId" value="{{ item[2] }}" /></form>
+      
+      <form action="/favorite" method="POST">
+        <input type="hidden" name="love" value="{{ item }}" /><button>
+          💗
+        </button>
+      </form>        </li>
+
+      {% endfor %}
+    </div>
+  </body>
+</html>
