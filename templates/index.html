@@ -45,12 +45,12 @@
   <div class="flex justify-between mt-8">
 
         {% if page > 1 %}
-        <a href="{{ '/series' if content == 'series' else '/' }}?page={{ page - 1 }}" class="px-4 py-2 bg-lime-700 text-white rounded">
+        <a href="{{ '/series' if request.path[1:] == 'series' else '/' }}?page={{ page - 1 }}" class="px-4 py-2 bg-lime-700 text-white rounded">
           ← Back
         </a>
         {% endif %}
 
-        <a href="{{ '/series' if content == 'series' else '/' }}?page={{ page + 1 }}" class="px-4 py-2 bg-lime-700 text-white rounded">
+        <a href="{{ '/series' if request.path[1:] == 'series' else '/' }}?page={{ page + 1 }}" class="px-4 py-2 bg-lime-700 text-white rounded">
           Next →
         </a>
 

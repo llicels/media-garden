@@ -90,9 +90,15 @@ def watching():
     link = request.form.get('link')
     content_type = request.form.get('type')
     content_id = request.form.get('id')
+    
+    print(link)
+    print(content_id)
 
     if content_type == "tv":
+        content_id = content_id.replace("tv_", "")
         info = data.seriesInfo(content_id)
+    elif content_type == "movie":
+        content_id = content_id.replace("movie_", "")
     else:
         info = []
 
