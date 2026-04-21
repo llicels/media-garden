@@ -10,10 +10,21 @@
 
 <div class="card bg-orange-100 rounded-xl p-2">
 
-  <a href="/watch?contentId={{ favorite.link }}&type={{ favorite.type }}">
-    <img src="{{ favorite.image_url }}" class="w-full h-80 object-cover rounded-lg">
-    <p class="text-sm mt-2 text-green-950">{{ favorite.title }}</p>
-  </a>
+  <form action="/watching" method="POST">
+      <button class="w-full">
+        <img src="{{ favorite.image }}" class="w-full h-80 object-cover rounded-xl transition group-hover:opacity-80">
+      </button>
+
+      <input type="hidden" name="link" value="{{ favorite.link }}">
+      <input type="hidden" name="id" value="{{ favorite.id }}">
+      <input type="hidden" name="type" value="{{ favorite.type }}">
+    </form>
+
+    <!-- TEXT -->
+    <div class="mt-2">
+      <p class="text-sm line-clamp-2 text-green-950">{{ favorite.title }}</p>
+      <p class="text-xs text-neutral-500">{{ favorite.type }}</p>
+    </div>
 
   <button 
     onclick="removeItem(this)"
