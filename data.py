@@ -163,7 +163,6 @@ def youtubeVideosByCategory(force_refresh=False):
     for category, channels in YOUTUBE_CHANNELS.items():
         videos = []
 
-        # 🔥 TEM QUE ESTAR DENTRO DA CATEGORIA
         for channel in channels:
             playlist_id = get_uploads_playlist(channel)
 
@@ -194,11 +193,9 @@ def youtubeVideosByCategory(force_refresh=False):
                 if not video_id:
                     continue
 
-                title = snippet.get("title", "")
-
                 videos_data.append({
                     "id": video_id,
-                    "title": title,
+                    "title": snippet.get("title", ""),
                     "image": snippet["thumbnails"]["high"]["url"],
                     "publishedAt": snippet.get("publishedAt", "")
                 })
@@ -219,17 +216,28 @@ def youtubeVideosByCategory(force_refresh=False):
                 video_response = requests.get(video_url, params=video_params).json()
 
                 for v in video_response.get("items", []):
-                    vid = v["id"]
-                    duration = v["contentDetails"]["duration"]
-                    video_info[vid] = parse_duration(duration)
+                    vid = v.get("id")
+
+                    content = v.get("contentDetails")
+                    if not content:
+                        continue
+
+                    duration_str = content.get("duration")
+                    if not duration_str:
+                        continue
+
+                    try:
+                        duration = parse_duration(duration_str)
+                        video_info[vid] = duration
+                    except:
+                        continue
 
             # 🔥 PASSO 3
             for v in videos_data:
                 vid = v["id"]
-
                 duration = video_info.get(vid)
 
-                # filtra shorts
+                # filtra shorts (<= 60s)
                 if duration is not None and duration <= 60:
                     continue
 
@@ -242,7 +250,7 @@ def youtubeVideosByCategory(force_refresh=False):
                     "publishedAt": v["publishedAt"]
                 })
 
-        # ordenar categoria inteira (depois de todos canais)
+        # ordenar depois de juntar todos canais da categoria
         videos.sort(key=lambda x: x["publishedAt"], reverse=True)
 
         result.append({
