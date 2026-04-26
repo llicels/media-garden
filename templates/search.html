@@ -18,7 +18,55 @@
 </div>
 
 {% if content %}
-  {% include "index.html" %}
+  <h2 class="text-xl mb-6 capitalize text-lime-700">
+  {{ request.path[1:] or "movies" }}
+</h2>
+
+<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+  {% for item in content %}
+  <div class="group cursor-pointer">
+
+    <form action="/watching" method="POST">
+      <button class="w-full">
+        <img src="{{ item.image }}" class="w-full h-80 object-cover rounded-xl transition group-hover:opacity-80">
+      </button>
+
+      <input type="hidden" name="link" value="{{ item.link }}">
+      <input type="hidden" name="id" value="{{ item.id }}">
+      <input type="hidden" name="type" value="{{ item.type }}">
+    </form>
+
+    <div class="mt-2">
+      <p class="text-sm line-clamp-2 text-green-950">{{ item.title }}</p>
+      <p class="text-xs text-neutral-500">{{ item.type }}</p>
+    </div>
+
+    <button 
+      onclick="saveItem(this)"
+      class="text-xs text-neutral-500 hover:text-pink-400"
+      data-id="{{ item.id }}"
+      data-title="{{ item.title }}"
+      data-image="{{ item.image }}"
+      data-link="{{ item.link }}"
+      data-type="{{ item.type }}">
+      ♥ save
+    </button>
+
+  </div>
+  {% endfor %}
+
+  <!-- <div class="flex justify-between mt-8">
+    {% if page > 1 %}
+    <a href="{{ '/series' if request.path[1:] == 'series' else '/' }}?page={{ page - 1 }}" class="px-4 py-2 bg-lime-700 text-white rounded">
+      ← Back
+    </a>
+    {% endif %}
+
+    <a href="{{ '/series' if request.path[1:] == 'series' else '/' }}?page={{ page + 1 }}" class="px-4 py-2 bg-lime-700 text-white rounded">
+      Next →
+    </a>
+  </div> -->
+</div>
 {% endif %}
 
 {% endblock %}

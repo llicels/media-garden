@@ -61,9 +61,9 @@ def searching():
     if request.method == 'POST':
         name = request.form.get('name')
         content = data.search(name)
-        return render_template('search.html', content=content)
+        return render_template('search.html', content=content, page=1)
 
-    return render_template('search.html')
+    return render_template('search.html', page=1)
 
 @app.route('/watch')
 def watch():
