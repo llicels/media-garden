@@ -66,10 +66,13 @@
       {% endfor %}
 
       <!-- LOAD MORE -->
-    <button onclick="loadMore('{{ section.category }}')" 
+    {% if section.videos|length > 8 %}
+    <button id="loadmore-{{ section.category }}"
+            onclick="loadMore('{{ section.category }}')" 
             class="mt-4 px-4 py-2 bg-lime-100 border border-lime-700 rounded">
       load more
     </button>
+    {% endif %}
 
     </div>
 
@@ -126,7 +129,6 @@ function removeItem(btn) {
 
 function loadMore(category) {
   const items = document.querySelectorAll(".extra-" + category);
-
   let shown = 0;
 
   items.forEach(el => {
@@ -135,6 +137,12 @@ function loadMore(category) {
       shown++;
     }
   });
+
+  const remaining = document.querySelectorAll(`.extra-${category}.hidden`);
+  if (remaining.length === 0) {
+    const btn = document.getElementById("loadmore-" + category);
+    if (btn) btn.style.display = "none";
+  }
 }
 </script>
 

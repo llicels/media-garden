@@ -309,28 +309,53 @@ def searchYoutube(query):
         "part": "snippet",
         "q": query,
         "type": "video",
-        "maxResults": 12,
+        "maxResults": 20,
         "key": YOUTUBE_API_KEY
     }
 
-    response = requests.get(url, params=params).json()
+    try:
+        response = requests.get(url, params=params, timeout=10).json()
+    except Exception as e:
+        print(f"YouTube search request failed: {e}")
+        return [{"category": "search", "videos": []}]
+
+    if "error" in response:
+        print(f"YouTube API error: {response['error']}")
+        return [{"category": "search", "videos": []}]
+
+    items = response.get("items")
+    if not items:
+        print("YouTube search returned no items")
+        return [{"category": "search", "videos": []}]
 
     videos = []
 
-    for item in response["items"]:
-        snippet = item["snippet"]
+    for item in items:
+        snippet = item.get("snippet")
+        if not snippet:
+            continue
 
-        title = snippet["title"]
+        title = snippet.get("title", "")
 
         if "shorts" in title.lower():
             continue
 
-        video_id = item["id"]["videoId"]
+        vid_data = item.get("id", {})
+        if not isinstance(vid_data, dict):
+            continue
+
+        video_id = vid_data.get("videoId")
+        if not video_id:
+            continue
+
+        thumbnails = snippet.get("thumbnails", {})
+        thumb = thumbnails.get("high") or thumbnails.get("medium") or thumbnails.get("default")
+        image = thumb["url"] if thumb else ""
 
         videos.append({
             "type": "youtube",
             "title": title,
-            "image": snippet["thumbnails"]["high"]["url"],
+            "image": image,
             "link": f"https://www.youtube.com/embed/{video_id}",
             "id": video_id
         })

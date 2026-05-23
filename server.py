@@ -45,7 +45,11 @@ def series():
 def youtube():
     if request.method == "POST":
         query = request.form.get("query")
-        content = data.searchYoutube(query)
+        try:
+            content = data.searchYoutube(query)
+        except Exception as e:
+            print(f"YouTube search error: {e}")
+            content = [{"category": "search", "videos": []}]
     else:
         content = data.youtubeVideosByCategory()
 
