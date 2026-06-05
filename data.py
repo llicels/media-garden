@@ -30,6 +30,7 @@ YOUTUBE_CHANNELS = {
         "UC3TYvpGVVD9DrqRQAMUqK1A",
         "UCS9K27KW782vvAwTHJpVePQ",
         "UCn9Erjy00mpnWeLnRqhsA1g",
+        "UC_TYFButglZuuDbD-0Q_IzQ"
     ],
     "productivity": [
         "UC9N7LoUG8eYNWDTAzUWWQ5A",
