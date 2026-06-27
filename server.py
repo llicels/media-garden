@@ -103,6 +103,7 @@ def watching():
         info = data.seriesInfo(content_id)
     elif content_type == "movie":
         content_id = content_id.replace("movie_", "")
+        info = []
     else:
         info = []
 
