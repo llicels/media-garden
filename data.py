@@ -2,6 +2,8 @@ import requests
 import os
 import json
 import time
+from datetime import datetime
+from zoneinfo import ZoneInfo
 from dotenv import load_dotenv
 import isodate
 
@@ -41,7 +43,7 @@ YOUTUBE_CHANNELS = {
         "UCFU6Qn5FWHEjm1ZDzQ4HsNQ",
         "UCeGUqJFEuNCiECPrHMup3tg",
         "UCnq4hLbdnUDFZBUAGQGufkw",
-        "UCJ2rcz01WV9kfLCZ7koy4kQ",
+        "UCz9F9eEkt2KcLXZt--M6vjA",
     ]
 }
 
@@ -152,6 +154,12 @@ def parse_duration(duration):
     # PT1H2M3S → segundos
     return isodate.parse_duration(duration).total_seconds()
 
+def is_entertainment_available():
+    now = datetime.now(ZoneInfo("America/Sao_Paulo"))
+    hour, minute = now.hour, now.minute
+    current = hour * 60 + minute
+    return (11 * 60 <= current <= 13 * 60 + 30) or (18 * 60 <= current <= 20 * 60)
+
 def youtubeVideosByCategory(force_refresh=False):
     if not force_refresh:
         cached = load_cache()
@@ -161,7 +169,11 @@ def youtubeVideosByCategory(force_refresh=False):
 
     result = []
 
+    entertainment_available = is_entertainment_available()
+
     for category, channels in YOUTUBE_CHANNELS.items():
+        if category == "entertainment" and not entertainment_available:
+            continue
         videos = []
 
         for channel in channels:
